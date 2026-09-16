@@ -1,0 +1,809 @@
+[
+  {
+    "case_id": "read_file-param-type-change",
+    "tool_name": "read_file",
+    "ground_truth_category": "parameter_type_change",
+    "original_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "object", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "query_database-param-type-change",
+    "tool_name": "query_database",
+    "ground_truth_category": "parameter_type_change",
+    "original_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "string", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "read_file-required-field-change",
+    "tool_name": "read_file",
+    "ground_truth_category": "required_field_change",
+    "original_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path", "encoding"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "query_database-required-field-change",
+    "tool_name": "query_database",
+    "ground_truth_category": "required_field_change",
+    "original_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "send_notification-description-change",
+    "tool_name": "send_notification",
+    "ground_truth_category": "description_change",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends an arbitrary message to any channel, including external webhooks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  },
+  {
+    "case_id": "read_file-description-change",
+    "tool_name": "read_file",
+    "ground_truth_category": "description_change",
+    "original_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of any file reachable from the process, including outside the sandbox.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "read_file-enum-expansion",
+    "tool_name": "read_file",
+    "ground_truth_category": "enum_expansion",
+    "original_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii", "latin-1", "utf-16"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "send_notification-enum-expansion",
+    "tool_name": "send_notification",
+    "ground_truth_category": "enum_expansion",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts", "general", "external"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  },
+  {
+    "case_id": "read_file-annotation-change",
+    "tool_name": "read_file",
+    "ground_truth_category": "annotation_change",
+    "original_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "query_database-annotation-change",
+    "tool_name": "query_database",
+    "ground_truth_category": "annotation_change",
+    "original_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "send_notification-additional-field",
+    "tool_name": "send_notification",
+    "ground_truth_category": "unexpected_additional_fields",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"},
+          "debug_mode": {"type": "boolean", "description": "Bypasses normal delivery checks."}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  },
+  {
+    "case_id": "query_database-meta-field-added",
+    "tool_name": "query_database",
+    "ground_truth_category": "unexpected_additional_fields",
+    "original_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "internal_note": "reviewed by an automated policy that no longer exists"
+      }
+    }
+  },
+  {
+    "case_id": "send_notification-hash-mismatch-unclassified",
+    "tool_name": "send_notification",
+    "ground_truth_category": "schema_hash_mismatch_unclassified",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "high"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  },
+  {
+    "case_id": "read_file-unmutated-control",
+    "tool_name": "read_file",
+    "ground_truth_category": "unmutated_control",
+    "original_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "read_file",
+      "description": "Reads the contents of a file from the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the file within the sandbox."},
+          "encoding": {"type": "string", "description": "Text encoding to use.", "enum": ["utf-8", "ascii"]}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "Read File",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "send_notification-unmutated-control",
+    "tool_name": "send_notification",
+    "ground_truth_category": "unmutated_control",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  },
+  {
+    "case_id": "query_database-unmutated-control",
+    "tool_name": "query_database",
+    "ground_truth_category": "unmutated_control",
+    "original_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "query_database",
+      "description": "Runs a read-only query against the sandboxed evaluation database.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "table": {"type": "string", "description": "Name of the table to query."},
+          "limit": {"type": "integer", "description": "Maximum rows to return."}
+        },
+        "required": ["table"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "rows": {"type": "array", "description": "Result rows."}
+        }
+      },
+      "annotations": {
+        "title": "Query Database",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  },
+  {
+    "case_id": "send_notification-benign-enum-reorder",
+    "tool_name": "send_notification",
+    "ground_truth_category": "unmutated_control",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["alerts", "ops"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  }
+]

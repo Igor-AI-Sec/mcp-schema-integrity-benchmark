@@ -1,0 +1,228 @@
+{
+  "generated_at": "2026-09-16T20:20:21.136782+00:00",
+  "corpus_path": "fixtures/mutation_corpus.json",
+  "corpus_size": 17,
+  "metrics": {
+    "mutation_detection_rate": 1.0,
+    "false_positive_rate": 0.25,
+    "detection_rate_by_category": {
+      "parameter_type_change": 1.0,
+      "required_field_change": 1.0,
+      "description_change": 1.0,
+      "enum_expansion": 1.0,
+      "annotation_change": 1.0,
+      "unexpected_additional_fields": 1.0,
+      "schema_hash_mismatch_unclassified": 1.0
+    },
+    "number_of_undetected_mutations": 0,
+    "number_of_correctly_classified_mutations": 13,
+    "_counts": {
+      "total_cases": 17,
+      "actual_mutations": 13,
+      "actual_unmutated": 4,
+      "true_positives": 13,
+      "false_negatives": 0,
+      "false_positives": 1
+    }
+  },
+  "case_results": [
+    {
+      "case_id": "read_file-param-type-change",
+      "tool_name": "read_file",
+      "ground_truth_category": "parameter_type_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "parameter_type_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "query_database-param-type-change",
+      "tool_name": "query_database",
+      "ground_truth_category": "parameter_type_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "parameter_type_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "read_file-required-field-change",
+      "tool_name": "read_file",
+      "ground_truth_category": "required_field_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "required_field_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "query_database-required-field-change",
+      "tool_name": "query_database",
+      "ground_truth_category": "required_field_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "required_field_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "send_notification-description-change",
+      "tool_name": "send_notification",
+      "ground_truth_category": "description_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "description_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "read_file-description-change",
+      "tool_name": "read_file",
+      "ground_truth_category": "description_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "description_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "read_file-enum-expansion",
+      "tool_name": "read_file",
+      "ground_truth_category": "enum_expansion",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "enum_expansion"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "send_notification-enum-expansion",
+      "tool_name": "send_notification",
+      "ground_truth_category": "enum_expansion",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "enum_expansion"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "read_file-annotation-change",
+      "tool_name": "read_file",
+      "ground_truth_category": "annotation_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "annotation_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "query_database-annotation-change",
+      "tool_name": "query_database",
+      "ground_truth_category": "annotation_change",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "annotation_change"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "send_notification-additional-field",
+      "tool_name": "send_notification",
+      "ground_truth_category": "unexpected_additional_fields",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "unexpected_additional_fields"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "query_database-meta-field-added",
+      "tool_name": "query_database",
+      "ground_truth_category": "unexpected_additional_fields",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "unexpected_additional_fields"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "send_notification-hash-mismatch-unclassified",
+      "tool_name": "send_notification",
+      "ground_truth_category": "schema_hash_mismatch_unclassified",
+      "actually_mutated": true,
+      "predicted_mutated": true,
+      "detection_correct": true,
+      "predicted_categories": [
+        "schema_hash_mismatch_unclassified"
+      ],
+      "category_classification_correct": true
+    },
+    {
+      "case_id": "read_file-unmutated-control",
+      "tool_name": "read_file",
+      "ground_truth_category": "unmutated_control",
+      "actually_mutated": false,
+      "predicted_mutated": false,
+      "detection_correct": true,
+      "predicted_categories": [],
+      "category_classification_correct": null
+    },
+    {
+      "case_id": "send_notification-unmutated-control",
+      "tool_name": "send_notification",
+      "ground_truth_category": "unmutated_control",
+      "actually_mutated": false,
+      "predicted_mutated": false,
+      "detection_correct": true,
+      "predicted_categories": [],
+      "category_classification_correct": null
+    },
+    {
+      "case_id": "query_database-unmutated-control",
+      "tool_name": "query_database",
+      "ground_truth_category": "unmutated_control",
+      "actually_mutated": false,
+      "predicted_mutated": false,
+      "detection_correct": true,
+      "predicted_categories": [],
+      "category_classification_correct": null
+    },
+    {
+      "case_id": "send_notification-benign-enum-reorder",
+      "tool_name": "send_notification",
+      "ground_truth_category": "unmutated_control",
+      "actually_mutated": false,
+      "predicted_mutated": true,
+      "detection_correct": false,
+      "predicted_categories": [
+        "parameter_type_change"
+      ],
+      "category_classification_correct": null
+    }
+  ]
+}
