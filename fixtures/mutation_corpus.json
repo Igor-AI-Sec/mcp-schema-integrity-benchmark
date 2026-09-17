@@ -805,5 +805,90 @@
         "openWorldHint": true
       }
     }
+  },
+  {
+    "case_id": "send_notification-required-reorder",
+    "tool_name": "send_notification",
+    "ground_truth_category": "unmutated_control",
+    "original_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["channel", "message"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    "presented_schema": {
+      "name": "send_notification",
+      "description": "Sends a notification message to a configured channel.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "channel": {"type": "string", "description": "Target channel identifier.", "enum": ["ops", "alerts"]},
+          "message": {"type": "string", "description": "The notification text."},
+          "priority": {"type": "string", "description": "Notification priority level.", "default": "normal"}
+        },
+        "required": ["message", "channel"]
+      },
+      "annotations": {
+        "title": "Send Notification",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    }
+  },
+  {
+    "case_id": "list_directory-explicit-readonlyhint-default",
+    "tool_name": "list_directory",
+    "ground_truth_category": "unmutated_control",
+    "original_schema": {
+      "name": "list_directory",
+      "description": "Lists files and subdirectories within the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the directory within the sandbox."}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "List Directory",
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    "presented_schema": {
+      "name": "list_directory",
+      "description": "Lists files and subdirectories within the sandboxed workspace directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {"type": "string", "description": "Relative path to the directory within the sandbox."}
+        },
+        "required": ["path"]
+      },
+      "annotations": {
+        "title": "List Directory",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
   }
 ]

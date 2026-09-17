@@ -60,6 +60,31 @@ class TestSchemaIntegrityMonitor(unittest.TestCase):
         self.assertTrue(result.diff)
         self.assertEqual(result.diff[0]["path"], "annotations.readOnlyHint")
 
+    def test_numeric_representation_mismatch_falls_back_to_unclassified(self) -> None:
+        # 1 and 1.0 compare equal in Python (1 == 1.0), so the structural
+        # diff finds nothing, but canonicalize() serializes them as "1"
+        # and "1.0" -- different fingerprints. The hash mismatch is real
+        # and must not be reported with an empty category set.
+        registry = ToolRegistry()
+        registry.register("t", {"name": "t", "inputSchema": {"properties": {"x": {"default": 1}}}})
+        monitor = SchemaIntegrityMonitor(registry)
+        result = monitor.check("t", {"name": "t", "inputSchema": {"properties": {"x": {"default": 1.0}}}})
+        self.assertTrue(result.mutated)
+        self.assertFalse(result.hash_matched)
+        self.assertEqual(result.diff, [])
+        self.assertEqual(result.mutation_categories, {"schema_hash_mismatch_unclassified"})
+
+    def test_boolean_vs_numeric_mismatch_falls_back_to_unclassified(self) -> None:
+        # Same invariant as the 1 vs 1.0 case, via True == 1 instead.
+        registry = ToolRegistry()
+        registry.register("t", {"name": "t", "inputSchema": {"properties": {"x": {"default": True}}}})
+        monitor = SchemaIntegrityMonitor(registry)
+        result = monitor.check("t", {"name": "t", "inputSchema": {"properties": {"x": {"default": 1}}}})
+        self.assertTrue(result.mutated)
+        self.assertFalse(result.hash_matched)
+        self.assertEqual(result.diff, [])
+        self.assertEqual(result.mutation_categories, {"schema_hash_mismatch_unclassified"})
+
     def test_unregistered_tool_raises_key_error(self) -> None:
         with self.assertRaises(KeyError):
             self.monitor.check("nonexistent_tool", {})
@@ -70,7 +95,7 @@ class TestSchemaIntegrityMonitor(unittest.TestCase):
         result = self.monitor.check("read_file", mutated)
         d = result.to_dict()
         self.assertIn("mutation_categories", d)
-        self.assertIsInstance(d["mutation_categories"], list)  # not a set — must be JSON-serializable
+        self.assertIsInstance(d["mutation_categories"], list)  # not a set; must be JSON-serializable
 
 
 if __name__ == "__main__":
