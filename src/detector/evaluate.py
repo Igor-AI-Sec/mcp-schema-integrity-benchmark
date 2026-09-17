@@ -1,8 +1,8 @@
 """Runs the detector over fixtures/mutation_corpus.json and produces results/results.json.
 
-This is the one place actual numbers get computed — nothing in this
-project hand-writes a metric; results.json is always the output of
-running this module against the fixture corpus.
+This is the one place actual numbers get computed: metrics are computed
+from the fixture corpus rather than hard-coded, and results.json is
+always the output of running this module against the fixture corpus.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ def run_case(case: dict) -> dict:
     `detection_correct` answers "did the yes/no mutated call match reality"
     (meaningful for every case, including controls). `category_classification_correct`
     answers "was the *category* right" and is only meaningful for cases that
-    actually contain a mutation — it's `None` (not applicable) for
+    actually contain a mutation; it's `None` (not applicable) for
     unmutated controls, rather than a misleading `False` for a case where
     there was never a category to get right in the first place.
     """
@@ -52,7 +52,12 @@ def run_case(case: dict) -> dict:
     elif not result.mutated:
         category_classification_correct = False
     else:
-        category_classification_correct = ground_truth_category in result.mutation_categories
+        # Exact-set match, not "is the right category merely present" --
+        # each of these fixtures injects exactly one mutation, so a
+        # prediction that includes the correct category alongside an
+        # extra, wrong one is still a wrong prediction, not a correct one
+        # that happens to have noise attached.
+        category_classification_correct = result.mutation_categories == {ground_truth_category}
 
     return {
         "case_id": case["case_id"],

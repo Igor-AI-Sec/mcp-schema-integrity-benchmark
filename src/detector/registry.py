@@ -32,7 +32,7 @@ class ToolRegistry:
 
         Without this, mutating the caller's original dict (or anything
         nested inside it) after registration would silently change what
-        this registry considers "trusted" — defeating the whole point of
+        this registry considers "trusted", defeating the whole point of
         a trusted baseline. Returns a defensive copy too (see `_snapshot()`)
         so mutating the returned `RegisteredTool.schema` can't reach back
         into the registry's internal state either.
@@ -46,7 +46,7 @@ class ToolRegistry:
         """Returns a defensive copy of the stored entry, not the internal object.
 
         `registry.get(name).schema[...] = ...` (or any nested mutation)
-        must not be able to change what the registry considers trusted —
+        must not be able to change what the registry considers trusted;
         the trusted baseline can only change via `register()`.
         """
         entry = self._tools.get(name)

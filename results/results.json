@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-09-16T20:20:21.136782+00:00",
+  "generated_at": "2026-09-17T15:43:07.464870+00:00",
   "corpus_path": "fixtures/mutation_corpus.json",
-  "corpus_size": 17,
+  "corpus_size": 19,
   "metrics": {
     "mutation_detection_rate": 1.0,
-    "false_positive_rate": 0.25,
+    "false_positive_rate": 0.5,
     "detection_rate_by_category": {
       "parameter_type_change": 1.0,
       "required_field_change": 1.0,
@@ -17,12 +17,12 @@
     "number_of_undetected_mutations": 0,
     "number_of_correctly_classified_mutations": 13,
     "_counts": {
-      "total_cases": 17,
+      "total_cases": 19,
       "actual_mutations": 13,
-      "actual_unmutated": 4,
+      "actual_unmutated": 6,
       "true_positives": 13,
       "false_negatives": 0,
-      "false_positives": 1
+      "false_positives": 3
     }
   },
   "case_results": [
@@ -221,6 +221,30 @@
       "detection_correct": false,
       "predicted_categories": [
         "parameter_type_change"
+      ],
+      "category_classification_correct": null
+    },
+    {
+      "case_id": "send_notification-required-reorder",
+      "tool_name": "send_notification",
+      "ground_truth_category": "unmutated_control",
+      "actually_mutated": false,
+      "predicted_mutated": true,
+      "detection_correct": false,
+      "predicted_categories": [
+        "required_field_change"
+      ],
+      "category_classification_correct": null
+    },
+    {
+      "case_id": "list_directory-explicit-readonlyhint-default",
+      "tool_name": "list_directory",
+      "ground_truth_category": "unmutated_control",
+      "actually_mutated": false,
+      "predicted_mutated": true,
+      "detection_correct": false,
+      "predicted_categories": [
+        "annotation_change"
       ],
       "category_classification_correct": null
     }

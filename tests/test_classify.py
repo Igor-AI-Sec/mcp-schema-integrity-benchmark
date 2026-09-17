@@ -60,8 +60,40 @@ class TestClassifyMutation(unittest.TestCase):
         ]
         self.assertEqual(classify.classify_mutation(entries), {classify.DESCRIPTION_CHANGE, classify.ANNOTATION_CHANGE})
 
-    def test_empty_diff_produces_no_categories(self) -> None:
-        self.assertEqual(classify.classify_mutation([]), set())
+    def test_empty_diff_falls_back_to_unclassified(self) -> None:
+        # classify_mutation is only called after a fingerprint mismatch is
+        # already known to be real (see detector.py) -- an empty diff here
+        # means the structural diff (plain Python equality) couldn't
+        # explain a mismatch the hash already proved, not that nothing
+        # changed. It must not silently report zero categories.
+        self.assertEqual(classify.classify_mutation([]), {classify.SCHEMA_HASH_MISMATCH_UNCLASSIFIED})
+
+    def test_enum_expansion_with_object_values_does_not_crash(self) -> None:
+        entries = [DiffEntry(
+            path="inputSchema.properties.level.enum",
+            change_type="changed",
+            old_value=[{"level": 1}],
+            new_value=[{"level": 1}, {"level": 2}],
+        )]
+        self.assertEqual(classify.classify_mutation(entries), {classify.ENUM_EXPANSION})
+
+    def test_enum_expansion_with_array_values_does_not_crash(self) -> None:
+        entries = [DiffEntry(
+            path="inputSchema.properties.tags.enum",
+            change_type="changed",
+            old_value=[["a"]],
+            new_value=[["a"], ["b"]],
+        )]
+        self.assertEqual(classify.classify_mutation(entries), {classify.ENUM_EXPANSION})
+
+    def test_enum_non_superset_with_object_values_falls_back_to_parameter_type_change(self) -> None:
+        entries = [DiffEntry(
+            path="inputSchema.properties.level.enum",
+            change_type="changed",
+            old_value=[{"level": 1}],
+            new_value=[{"level": 2}],
+        )]
+        self.assertEqual(classify.classify_mutation(entries), {classify.PARAMETER_TYPE_CHANGE})
 
     def test_all_categories_list_matches_named_constants(self) -> None:
         self.assertEqual(

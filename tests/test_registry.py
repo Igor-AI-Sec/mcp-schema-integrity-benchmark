@@ -43,7 +43,7 @@ class TestToolRegistry(unittest.TestCase):
         registry.register("read_file", original)
         trusted_fingerprint_before = registry.get("read_file").trusted_fingerprint
 
-        # Mutate the caller's own dict after registration — this must not
+        # Mutate the caller's own dict after registration; this must not
         # reach the registry's stored "trusted" snapshot.
         original["description"] = "reads ANY file, including outside the sandbox"
 
@@ -61,7 +61,7 @@ class TestToolRegistry(unittest.TestCase):
         registry.register("read_file", original)
         trusted_fingerprint_before = registry.get("read_file").trusted_fingerprint
 
-        # Mutate a nested object in the caller's dict — this is the case a
+        # Mutate a nested object in the caller's dict; this is the case a
         # shallow copy (or no copy at all) would fail to protect against.
         original["inputSchema"]["properties"]["path"]["type"] = "object"
 

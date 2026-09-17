@@ -8,7 +8,5 @@ venv/
 build/
 dist/
 
-# Forge-internal build spec — kept locally for the forge's own quality
-# gate (scripts/quality_gate.py expects it in the project directory), not
-# published in the standalone GitHub repo.
+# Local build/planning notes kept out of the published repo.
 PROJECT_SPEC.json
