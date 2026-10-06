@@ -8,8 +8,8 @@ can you tell *what* changed?
 Short answer: yes, trivially, if you're willing to hash the schema and
 compare. The harder part, figuring out what kind of change it was, worked
 on every genuine mutation in the fixture corpus, and broke in several
-specific, related ways I didn't expect going in. Those breaks are the more
-interesting result here, more than the 100% detection number is.
+specific, related ways. Those breaks are the more interesting result here,
+more than the 100% detection number is.
 
 Two things worth knowing before you read further:
 
@@ -75,7 +75,8 @@ and a `presented_schema`, with the expected label stored explicitly as
 `inputSchema` is plain JSON Schema (`type`, `properties`, `required`) and
 `annotations` uses the hint fields MCP tools actually define
 (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`,
-`title`). One case also carries an `outputSchema`.
+`title`). The five `query_database` cases also carry an `outputSchema`,
+identical in the original and presented schemas.
 
 One case adds a `_meta` field between registration and presentation.
 `_meta` is a field MCP itself permits, so this isn't testing whether the
@@ -111,13 +112,14 @@ All three came back flagged as mutated. Canonicalization sorts dictionary
 keys but not the contents of lists, so a reordered list still produces a
 different hash. And the detector has no concept of an MCP-defined default
 value, so writing one out explicitly looks exactly like adding a new
-annotation. Each gets misclassified, too, since the actual rule that would
-explain each one correctly (an unordered list comparison, or a
-default-aware annotation comparison) doesn't exist:
+annotation. Each also gets a label that doesn't describe it, or the
+fallback, since the rule that would explain each one correctly (an
+unordered list comparison, or a default-aware annotation comparison)
+doesn't exist:
 
 | Control | Predicted category |
 |---|---|
-| Enum reorder | `parameter_type_change` (enum expansion only fires on strict superset growth, not reordering) |
+| Enum reorder | `schema_hash_mismatch_unclassified` (an enum edit is only called an expansion when it adds a new distinct value, so a reorder falls back) |
 | Required-list reorder | `required_field_change` (correct category, wrong verdict: it isn't a mutation at all) |
 | Explicit annotation default | `annotation_change` (correct category, wrong verdict, same reason) |
 
@@ -222,7 +224,9 @@ python -c "import sys; sys.path.insert(0, 'src'); from detector.evaluate import 
 The second command reruns the evaluation and overwrites
 `results/results.json`. Both are deterministic, no network calls, nothing
 random, so running them again should give you the same numbers as in
-`reports/evaluation_report.md`.
+`reports/evaluation_report.md`. The results file also records a
+`generated_at` timestamp, so regenerating it changes that line even though
+the benchmark numbers stay the same.
 
 (`python -m detector.evaluate` won't work directly, because `src/` isn't
 on the path by default here. The one-liner above handles that without an
@@ -234,36 +238,69 @@ editable install. `pip install -e .` would also work if you'd rather have
 - The corpus is small: 19 cases, 4 mock tools. Enough to exercise every
   category at least once and to surface three distinct benign-equivalence
   false positives, not enough to say anything about a real-world
-  false-positive rate. Every mutated case changes exactly one field;
-  nothing tests removing a parameter from `required`, only adding one or
-  changing an existing value. Unicode normalization and whitespace-only
-  string differences are still untested; numeric representation (`1` vs
-  `1.0`) and boolean/numeric equality (`true` vs `1`) are covered as unit
-  tests on the classifier directly rather than as corpus fixtures, since
-  both currently fall back to `schema_hash_mismatch_unclassified` rather
-  than a specific category, which is the honest answer but not a very
-  informative fixture to show alongside the other categories.
+  false-positive rate. Every mutated case changes exactly one field. The
+  `required` cases cover adding an entry (`read_file`) and removing the
+  only entry (`query_database`); removing one of several entries is not in
+  the corpus. Unicode normalization and whitespace-only string differences
+  are still untested. A number written as `1.0` instead of `1`, and `true`
+  against `1`, are covered as unit tests on the detector rather than as
+  corpus fixtures. Both give a hash mismatch with an empty structural diff
+  (Python treats each pair as equal), so both fall back to
+  `schema_hash_mismatch_unclassified`, which is the honest answer but not a
+  very informative fixture. They are different kinds of case: `1` vs `1.0`
+  is benign, while `true` vs `1` is a real type change.
 - The classifier is a fixed set of rules keyed on where in the schema
   something changed, not anything learned. It will flag a mutation it
-  doesn't recognize (falling back to "unclassified"), but it can mislabel
-  one, the way it does with all three benign-equivalence controls above.
-  It also has no concept of order-insensitive comparison for `enum` or
-  `required` lists, or of MCP's own annotation defaults, which is exactly
-  what produces those three false positives; fixing either would mean
-  teaching the classifier what "semantically inert" means for a given
-  field, which is a different, harder problem than diffing values.
-- Nothing here tests compound mutations. Every genuine-mutation case
-  changes one thing at a time. Real tampering probably wouldn't be that
-  considerate.
+  doesn't recognize (falling back to "unclassified"). For the
+  benign-equivalence controls above it either falls back or names a
+  category for a change that isn't one. The hash is order-sensitive, so a
+  reordered `enum` or `required` list is always reported as a mutation. For
+  classification, `enum` members are compared as a set, so a reorder is not
+  called an expansion, but that does not change the verdict. The
+  classifier also has no concept of MCP's own annotation defaults. Together
+  these produce the three false positives; fixing them would mean teaching
+  the detector what "semantically inert" means for a given field, which is
+  a different, harder problem than diffing values.
+- The corpus has no compound-mutation fixtures: every genuine-mutation
+  case changes one thing at a time. The classifier returns the union of
+  the categories matched by each diff entry, and unit tests cover that
+  union (and that an extra predicted category makes a classification
+  wrong), but how it performs on compound mutations in a corpus is not
+  measured. Real tampering probably wouldn't be that considerate.
+- Classification reads where a change sits, by key. A schema keyword such
+  as `description`, `required`, `enum` or `type` selects a category. A
+  property name directly under `properties` does not, even when it is
+  called `description`, `type`, `enum`, `annotations` or `required`, or
+  contains a dot; a new property is reported as an unexpected additional
+  field. Values under `default`, `const` and `examples` are data, so keys
+  inside them are never read as keywords. That is the whole structural
+  model. Other constructs that carry names or nested schemas, such as
+  `$defs`, `patternProperties` and `dependentSchemas`, are outside it, and
+  a change there can fall back to `schema_hash_mismatch_unclassified` or be
+  given a category that doesn't describe it.
+- The classifier is shallow in other ways too. Added constraint keywords
+  (`maximum`, `oneOf`, `additionalProperties`) are reported as unexpected
+  additional fields. A removed property, a changed top-level
+  `inputSchema.type`, a changed numeric constraint and a `type` change
+  inside `outputSchema` all fall back to
+  `schema_hash_mismatch_unclassified`; only `type` changes under
+  `inputSchema.properties` count as `parameter_type_change`. An enum edit is
+  labelled `enum_expansion` only when every old value is kept and a new
+  distinct value is added (values are compared as JSON Schema does, so `1`
+  and `1.0` are the same value while `true` and `1` are not). A reorder, a
+  duplicate, a removal, a replacement, and an enum created or removed
+  outright fall back as well.
+- Syntactic equivalence also means that equal numbers written differently
+  (`1` vs `1.0`, `100` vs `100.0`) produce different hashes. They are
+  false positives of the same kind as the three controls above, but they
+  are covered only by unit tests, not by the corpus.
 - The fixtures cover a narrow slice of JSON Schema (`type`, `properties`,
   `required`, `enum`, `default`), not the full JSON Schema 2020-12
   vocabulary that MCP's `inputSchema`/`outputSchema` actually allow. See
   "MCP scope" above.
-- This project uses the standard library and `unittest` instead of
-  `pytest`, since `pytest` wasn't installed in the environment it was
-  built in and a synthetic evaluation doesn't need a live protocol
-  implementation. `pyproject.toml` lists `pytest` as an optional
-  dependency if you'd rather run these same tests under it.
+- This project uses only the standard library and `unittest`, so it has
+  no dependencies to install. `pyproject.toml` lists `pytest` as an
+  optional dependency if you'd rather run these same tests under it.
 - This isn't a production security tool. It measures one specific
   technique, hash comparison plus rule-based diffing, against a synthetic,
   purpose-built corpus. Don't read the numbers above as evidence about how

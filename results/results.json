@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-17T15:43:07.464870+00:00",
+  "generated_at": "2026-10-06T09:20:00.742110+00:00",
   "corpus_path": "fixtures/mutation_corpus.json",
   "corpus_size": 19,
   "metrics": {
@@ -220,7 +220,7 @@
       "predicted_mutated": true,
       "detection_correct": false,
       "predicted_categories": [
-        "parameter_type_change"
+        "schema_hash_mismatch_unclassified"
       ],
       "category_classification_correct": null
     },
