@@ -1,8 +1,9 @@
 # Evaluation report: mcp-schema-integrity-benchmark
 
-This summarizes a single run of `src/detector/evaluate.py` against
-`fixtures/mutation_corpus.json`. Every number below comes directly from
-`results/results.json`; nothing here is fabricated or estimated.
+This summarizes a run of `src/detector/evaluate.py` against
+`fixtures/mutation_corpus.json`. The numbers below are the ones in
+`results/results.json`. That file also records a `generated_at` timestamp,
+so regenerating it changes that line; the benchmark numbers do not change.
 
 ## Corpus
 
@@ -67,11 +68,11 @@ three adversarial controls broke it, for two related reasons:
 - Reordering an enum's values, or a required list's entries, without
   changing their contents still changes the fingerprint, because
   canonicalization sorts dictionary keys but not list contents. The enum
-  reorder gets mislabeled as `parameter_type_change` (the enum-expansion
-  rule only recognizes strict growth, not reordering); the required-list
-  reorder gets labeled `required_field_change`, which is the right
-  category name for the wrong reason, since nothing was actually
-  mutated.
+  reorder falls back to `schema_hash_mismatch_unclassified` (the
+  enum-expansion rule needs a new distinct value, and a reorder adds
+  none); the required-list reorder gets labeled `required_field_change`,
+  which is the right category name for the wrong reason, since nothing was
+  actually mutated.
 - Writing an annotation out explicitly with the exact value the MCP spec
   already treats as its default produces a genuinely new key in the diff,
   which the classifier has no way to distinguish from an actual behavior
@@ -81,21 +82,32 @@ Three false positives out of six controls, traceable to two design
 choices: list-order-sensitive hashing, and no concept of protocol-level
 default values.
 
-## Fixes applied since the previous version of this report
-
-Two bugs were found and fixed in the detector itself:
+## Behaviour worth knowing
 
 - A fingerprint mismatch caused by a value that differs in canonical JSON
   form but compares equal under plain Python equality (`1 == 1.0`,
-  `True == 1`) used to produce an empty diff and an empty category set,
-  silently reporting `mutated=True` with nothing to explain it. It now
-  falls back to `schema_hash_mismatch_unclassified`, consistent with every
-  other diff shape the classifier doesn't have a specific rule for.
-- Enum-expansion classification used to build a plain `set()` of enum
-  values, which raises `TypeError` the moment an enum value is a list or
-  object (unhashable). It now canonicalizes each value to a JSON string
-  before comparing, so object- and array-valued enums are classified the
-  same way string-valued ones already were.
+  `True == 1`) produces an empty structural diff. The result is still
+  `mutated=True`, with the category `schema_hash_mismatch_unclassified`
+  and not an empty category set.
+- Enum members of any JSON type, including arrays and objects, are compared
+  by JSON Schema equality: `1` and `1.0` are the same member, `true` and
+  `1` are different members, and arrays and objects compare recursively.
+  An enum edit is labelled `enum_expansion` only when every old member is
+  kept and a new distinct member is added. Reorders, duplicates, removals,
+  replacements, and an enum created or removed outright fall back to
+  `schema_hash_mismatch_unclassified`. The enum comparison is semantic and
+  set-like, but the hash stays order-sensitive, so a reordered enum is still
+  reported as a mutation.
+- Classification reads each diff location as a list of keys and tells
+  schema keywords from user-chosen names. A property named directly under
+  `properties` is a name even when it is called `description`, `type`,
+  `enum`, `annotations` or `required`, or contains a dot; a new property of
+  that kind is reported as an unexpected additional field. Values under
+  `default`, `const` and `examples` are data, so keys inside them are not
+  read as keywords. `$defs`, `patternProperties` and `dependentSchemas` are
+  outside this model and may fall back or be misclassified. A `type` change
+  under `outputSchema` is not an input parameter type change and falls back
+  to `schema_hash_mismatch_unclassified`.
 
 ## Limitations of this evaluation
 
@@ -105,16 +117,19 @@ Two bugs were found and fixed in the detector itself:
   anything about a false-positive rate in general. The 0.5 figure is
   "3 adversarial cases out of 6 controls in this fixture set," not a
   population-level estimate.
-- **No compound mutations.** Every mutated case changes exactly one
-  thing. Real tampering could combine several changes at once; the
-  classifier would report the union of matched categories, but this
-  hasn't been tested.
+- **No compound-mutation fixtures.** Every mutated case changes exactly one
+  thing. The classifier reports the union of the categories matched by each
+  diff entry, and unit tests cover that, but corpus-level classification of
+  compound mutations is not measured.
 - **Other benign-equivalence cases remain untested**: Unicode
   normalization forms and whitespace-only string differences aren't in
-  the corpus. Numeric representation (`1` vs `1.0`) and boolean/numeric
-  equality (`true` vs `1`) are covered by unit tests directly against the
-  classifier rather than as corpus fixtures.
-- **The classifier is a fixed set of path-based rules**, not a learned or
+  the corpus. Equal numbers written differently (`1` vs `1.0`, `100` vs
+  `100.0`) change the hash, so they are another case of the deliberate
+  syntactic-equivalence limitation and would be false positives if they
+  were added to the controls. They are covered by unit tests rather than as
+  corpus fixtures. `true` vs `1` is also unit-tested, but it is a real type
+  change and not a benign one.
+- **The classifier is a fixed set of location-based rules**, not a learned or
   formally verified system. It will correctly flag any content change as
   a mismatch (the hash guarantees that), but it can misclassify a diff
   shape it wasn't designed to recognize, or one that's semantically inert

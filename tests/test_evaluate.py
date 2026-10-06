@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -57,12 +58,11 @@ class TestRunEvaluation(unittest.TestCase):
         # Not applicable for a control case -- there was never a mutation
         # category to get right in the first place.
         self.assertIsNone(reorder_case["category_classification_correct"])
-        # Misclassified as parameter_type_change: the enum-expansion rule
-        # only fires when the new enum is a strict superset of the old one,
-        # and a same-set reorder isn't a superset (same length, no growth),
-        # so classify.py's enum branch falls to its own parameter_type_change
-        # case instead. This is a documented, honest limitation.
-        self.assertEqual(reorder_case["predicted_categories"], ["parameter_type_change"])
+        # No rule explains a same-set reorder: the enum-expansion rule needs
+        # a new distinct member, so the enum branch falls back to the
+        # unclassified category. The hash mismatch is still reported as a
+        # mutation, which is the false positive.
+        self.assertEqual(reorder_case["predicted_categories"], ["schema_hash_mismatch_unclassified"])
 
     def test_required_reorder_case_is_a_false_positive(self) -> None:
         # Same underlying cause as the enum reorder: canonicalize() sorts
@@ -110,6 +110,51 @@ class TestRunEvaluation(unittest.TestCase):
         self.assertEqual(first, second)
 
 
+class TestCommittedResultsAreCurrent(unittest.TestCase):
+    """The committed results/results.json is what the evaluation produces now.
+
+    Only `generated_at` is allowed to differ. Reading the file as text and
+    parsing it as JSON makes the comparison independent of line endings.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        committed = json.loads(evaluate.DEFAULT_RESULTS_PATH.read_text(encoding="utf-8"))
+        fresh = json.loads(json.dumps(evaluate.run_evaluation()))
+        cls.committed_timestamp = committed.pop("generated_at", None)
+        fresh.pop("generated_at")
+        cls.committed = committed
+        cls.fresh = fresh
+
+    def test_the_committed_file_records_a_timestamp(self) -> None:
+        self.assertIsInstance(self.committed_timestamp, str)
+
+    def test_a_fresh_evaluation_matches_the_committed_results_apart_from_the_timestamp(self) -> None:
+        self.assertEqual(self.fresh, self.committed)
+
+    def test_the_top_level_keys_match(self) -> None:
+        self.assertEqual(set(self.fresh), set(self.committed))
+        self.assertEqual(self.fresh["corpus_size"], self.committed["corpus_size"])
+        self.assertEqual(self.fresh["corpus_path"], self.committed["corpus_path"])
+
+    def test_every_case_result_matches(self) -> None:
+        self.assertEqual(len(self.fresh["case_results"]), len(self.committed["case_results"]))
+        for fresh, committed in zip(self.fresh["case_results"], self.committed["case_results"]):
+            self.assertEqual(fresh, committed, fresh["case_id"])
+
+    def test_the_metrics_match(self) -> None:
+        self.assertEqual(self.fresh["metrics"], self.committed["metrics"])
+        self.assertEqual(self.fresh["metrics"]["detection_rate_by_category"], self.committed["metrics"]["detection_rate_by_category"])
+
+    def test_the_comparison_notices_drift(self) -> None:
+        drifted = json.loads(json.dumps(self.committed))
+        drifted["case_results"][0]["predicted_categories"] = ["description_change"]
+        self.assertNotEqual(self.fresh, drifted)
+        drifted = json.loads(json.dumps(self.committed))
+        drifted["metrics"]["_counts"]["false_positives"] += 1
+        self.assertNotEqual(self.fresh, drifted)
+
+
 class TestCategoryClassificationCorrectness(unittest.TestCase):
     def test_extra_predicted_category_is_not_fully_correct(self) -> None:
         # A case that trips two categories at once (description AND
@@ -140,6 +185,104 @@ class TestCategoryClassificationCorrectness(unittest.TestCase):
         result = evaluate.run_case(case)
         self.assertEqual(result["predicted_categories"], ["description_change"])
         self.assertTrue(result["category_classification_correct"])
+
+
+def _case(case_id: str, truth: str, original: dict, presented: dict, tool_name: str = "t") -> dict:
+    return {
+        "case_id": case_id,
+        "tool_name": tool_name,
+        "ground_truth_category": truth,
+        "original_schema": original,
+        "presented_schema": presented,
+    }
+
+
+DESCRIBED = {"name": "t", "description": "a"}
+DESCRIPTION_CHANGED = {"name": "t", "description": "b"}
+ANNOTATED = {"name": "t", "annotations": {"readOnlyHint": True}}
+ANNOTATION_CHANGED = {"name": "t", "annotations": {"readOnlyHint": False}}
+
+
+class TestMissedMutationAccounting(unittest.TestCase):
+    """The real corpus misses nothing, so these use synthetic cases: a case
+    labelled as a mutation whose presented schema is identical to the
+    original, which the detector cannot flag."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.cases = [
+            _case("detected-description", "description_change", DESCRIBED, DESCRIPTION_CHANGED),
+            _case("missed-description", "description_change", DESCRIBED, dict(DESCRIBED)),
+            _case("detected-annotation", "annotation_change", ANNOTATED, ANNOTATION_CHANGED),
+            _case("clean-control", "unmutated_control", DESCRIBED, dict(DESCRIBED)),
+            _case("flagged-control", "unmutated_control", DESCRIBED, DESCRIPTION_CHANGED),
+        ]
+        cls.case_results = [evaluate.run_case(c) for c in cls.cases]
+        cls.by_id = {r["case_id"]: r for r in cls.case_results}
+        cls.groups = evaluate.partition_cases(cls.case_results)
+        cls.metrics = evaluate.compute_metrics(cls.case_results)
+
+    def test_a_missed_mutation_is_scored_as_not_detected_and_not_classified(self) -> None:
+        missed = self.by_id["missed-description"]
+        self.assertTrue(missed["actually_mutated"])
+        self.assertFalse(missed["predicted_mutated"])
+        self.assertFalse(missed["detection_correct"])
+        self.assertIs(missed["category_classification_correct"], False)
+        self.assertEqual(missed["predicted_categories"], [])
+
+    def test_the_false_negatives_list_contains_exactly_the_missed_case(self) -> None:
+        self.assertEqual([c["case_id"] for c in self.groups["false_negatives"]], ["missed-description"])
+
+    def test_the_false_negative_count_and_undetected_metric_increment(self) -> None:
+        self.assertEqual(self.metrics["_counts"]["false_negatives"], 1)
+        self.assertEqual(self.metrics["number_of_undetected_mutations"], 1)
+        self.assertEqual(self.metrics["_counts"]["true_positives"], 2)
+        self.assertEqual(self.metrics["_counts"]["actual_mutations"], 3)
+
+    def test_the_missed_mutation_is_not_counted_as_correctly_classified(self) -> None:
+        self.assertEqual([c["case_id"] for c in self.groups["correctly_classified"]], ["detected-description", "detected-annotation"])
+        self.assertEqual(self.metrics["number_of_correctly_classified_mutations"], 2)
+
+    def test_the_detection_rate_reflects_the_miss(self) -> None:
+        self.assertAlmostEqual(self.metrics["mutation_detection_rate"], 2 / 3)
+
+    def test_per_category_detection_rates_reflect_the_miss(self) -> None:
+        by_category = self.metrics["detection_rate_by_category"]
+        self.assertEqual(by_category["description_change"], 0.5)
+        self.assertEqual(by_category["annotation_change"], 1.0)
+        self.assertEqual(set(by_category), {"description_change", "annotation_change"})
+
+    def test_controls_are_counted_separately_from_misses(self) -> None:
+        self.assertEqual([c["case_id"] for c in self.groups["false_positives"]], ["flagged-control"])
+        self.assertEqual(self.metrics["_counts"]["false_positives"], 1)
+        self.assertEqual(self.metrics["_counts"]["actual_unmutated"], 2)
+        self.assertEqual(self.metrics["false_positive_rate"], 0.5)
+
+    def test_a_missed_case_in_every_category_gives_zero_rates(self) -> None:
+        missed = [
+            evaluate.run_case(_case("m1", "description_change", DESCRIBED, dict(DESCRIBED))),
+            evaluate.run_case(_case("m2", "annotation_change", ANNOTATED, dict(ANNOTATED))),
+        ]
+        metrics = evaluate.compute_metrics(missed)
+        self.assertEqual(metrics["mutation_detection_rate"], 0.0)
+        self.assertEqual(metrics["detection_rate_by_category"], {"description_change": 0.0, "annotation_change": 0.0})
+        self.assertEqual(metrics["number_of_undetected_mutations"], 2)
+        self.assertEqual(metrics["number_of_correctly_classified_mutations"], 0)
+
+    def test_rates_are_none_when_a_group_is_empty(self) -> None:
+        only_controls = evaluate.compute_metrics([evaluate.run_case(_case("c", "unmutated_control", DESCRIBED, dict(DESCRIBED)))])
+        self.assertIsNone(only_controls["mutation_detection_rate"])
+        self.assertEqual(only_controls["false_positive_rate"], 0.0)
+        only_mutations = evaluate.compute_metrics([evaluate.run_case(_case("m", "description_change", DESCRIBED, DESCRIPTION_CHANGED))])
+        self.assertIsNone(only_mutations["false_positive_rate"])
+        self.assertEqual(only_mutations["mutation_detection_rate"], 1.0)
+
+    def test_the_real_corpus_has_no_missed_mutation(self) -> None:
+        real = evaluate.partition_cases(evaluate.run_evaluation()["case_results"])
+        self.assertEqual(real["false_negatives"], [])
+        self.assertEqual(len(real["actual_mutations"]), 13)
+        self.assertEqual(len(real["actual_unmutated"]), 6)
+        self.assertEqual(len(real["false_positives"]), 3)
 
 
 if __name__ == "__main__":

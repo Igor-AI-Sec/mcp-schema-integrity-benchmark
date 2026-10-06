@@ -24,6 +24,18 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual(canonicalize(a), canonicalize(b))
 
 
+class TestNumericRepresentation(unittest.TestCase):
+    """Equal numbers written with a different representation hash differently."""
+
+    def test_integer_and_float_forms_of_the_same_number_have_different_fingerprints(self) -> None:
+        self.assertNotEqual(fingerprint({"x": 1}), fingerprint({"x": 1.0}))
+        self.assertNotEqual(fingerprint({"x": 100}), fingerprint({"x": 100.0}))
+
+    def test_exponent_notation_in_json_text_loads_to_the_same_float(self) -> None:
+        import json
+        self.assertEqual(fingerprint(json.loads('{"x": 1e2}')), fingerprint({"x": 100.0}))
+
+
 class TestFingerprint(unittest.TestCase):
     def test_identical_schemas_produce_identical_fingerprints(self) -> None:
         schema = {"name": "t", "inputSchema": {"properties": {"x": {"type": "string"}}}}

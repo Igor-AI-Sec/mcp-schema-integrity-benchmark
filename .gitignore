@@ -7,6 +7,3 @@ __pycache__/
 venv/
 build/
 dist/
-
-# Local build/planning notes kept out of the published repo.
-PROJECT_SPEC.json

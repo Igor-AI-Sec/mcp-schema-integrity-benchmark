@@ -71,14 +71,32 @@ def run_case(case: dict) -> dict:
     }
 
 
-def compute_metrics(case_results: list[dict]) -> dict:
+def partition_cases(case_results: list[dict]) -> dict[str, list[dict]]:
+    """Split scored cases into the groups the metrics are counted from.
+
+    Returned as lists of case results, so a missed mutation can be inspected
+    by case id and not only counted.
+    """
     actual_mutations = [c for c in case_results if c["actually_mutated"]]
     actual_unmutated = [c for c in case_results if not c["actually_mutated"]]
+    return {
+        "actual_mutations": actual_mutations,
+        "actual_unmutated": actual_unmutated,
+        "true_positives": [c for c in actual_mutations if c["predicted_mutated"]],
+        "false_negatives": [c for c in actual_mutations if not c["predicted_mutated"]],
+        "false_positives": [c for c in actual_unmutated if c["predicted_mutated"]],
+        "correctly_classified": [c for c in actual_mutations if c["category_classification_correct"] is True],
+    }
 
-    true_positives = [c for c in actual_mutations if c["predicted_mutated"]]
-    false_negatives = [c for c in actual_mutations if not c["predicted_mutated"]]
-    false_positives = [c for c in actual_unmutated if c["predicted_mutated"]]
-    correctly_classified = [c for c in actual_mutations if c["category_classification_correct"] is True]
+
+def compute_metrics(case_results: list[dict]) -> dict:
+    groups = partition_cases(case_results)
+    actual_mutations = groups["actual_mutations"]
+    actual_unmutated = groups["actual_unmutated"]
+    true_positives = groups["true_positives"]
+    false_negatives = groups["false_negatives"]
+    false_positives = groups["false_positives"]
+    correctly_classified = groups["correctly_classified"]
 
     mutation_detection_rate = len(true_positives) / len(actual_mutations) if actual_mutations else None
     false_positive_rate = len(false_positives) / len(actual_unmutated) if actual_unmutated else None
